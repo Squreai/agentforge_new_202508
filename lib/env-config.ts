@@ -4,119 +4,101 @@
 
 export const ENV_CONFIG = {
   // AI Works 기본 설정
-  DEFAULT_AI_WORKS_KEY: process.env.DEFAULT_AI_WORKS_KEY || "2121",
+  DEFAULT_AI_WORKS_KEY: process.env.DEFAULT_AI_WORKS_KEY || "",
   DEFAULT_API_AVAILABLE: process.env.NEXT_PUBLIC_DEFAULT_API_AVAILABLE === "true",
 
   // Google APIs
-  GOOGLE_CUSTOM_SEARCH_API_KEY: process.env.GOOGLE_CUSTOM_SEARCH_API_KEY || "AIzaSyD0HC9KVqdZoth0KxEdrqDXgHrFUo0e5Nw",
-  GOOGLE_SEARCH_ENGINE_ID: process.env.NEXT_PUBLIC_GOOGLE_SEARCH_ENGINE_ID || "e2e41f7fa26ed4ee4",
-  GOOGLE_GCP_API_KEY: process.env.GOOGLE_GCP_API_KEY || "AIzaSyBbZ13552fyTJe0qr0OUZ-JUGpfTQe7q_Y",
+  GOOGLE_CUSTOM_SEARCH_API_KEY: process.env.GOOGLE_CUSTOM_SEARCH_API_KEY || "",
+  GOOGLE_SEARCH_ENGINE_ID: process.env.NEXT_PUBLIC_GOOGLE_SEARCH_ENGINE_ID || "",
+  GOOGLE_GCP_API_KEY: process.env.GOOGLE_GCP_API_KEY || "",
 
   // Naver Search API
-  NAVER_CLIENT_ID: process.env.NAVER_CLIENT_ID || "U58tSZO_OlMVtNRJzGA0",
-  NAVER_CLIENT_SECRET: process.env.NAVER_CLIENT_SECRET || "LqNHPhqkDB",
+  NAVER_CLIENT_ID: process.env.NAVER_CLIENT_ID || "",
+  NAVER_CLIENT_SECRET: process.env.NAVER_CLIENT_SECRET || "",
 
   // Infura 설정
-  INFURA_PROJECT_ID: process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca",
+  INFURA_PROJECT_ID: process.env.INFURA_PROJECT_ID || "",
   INFURA_PROJECT_SECRET: process.env.INFURA_PROJECT_SECRET || "",
 
   // 블록체인 네트워크 URL들
   BLOCKCHAIN_NETWORKS: {
     ethereum: {
       mainnet:
-        process.env.ETHEREUM_MAINNET_URL ||
-        `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.ETHEREUM_MAINNET_URL || `https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       sepolia:
-        process.env.ETHEREUM_SEPOLIA_URL ||
-        `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
-      hoodi:
-        process.env.ETHEREUM_HOODI_URL ||
-        `https://hoodi.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.ETHEREUM_SEPOLIA_URL || `https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
+      hoodi: process.env.ETHEREUM_HOODI_URL || `https://hoodi.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     polygon: {
       mainnet:
         process.env.POLYGON_MAINNET_URL ||
-        `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
-      amoy:
-        process.env.POLYGON_AMOY_URL ||
-        `https://polygon-amoy.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://polygon-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
+      amoy: process.env.POLYGON_AMOY_URL || `https://polygon-amoy.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     arbitrum: {
       mainnet:
         process.env.ARBITRUM_MAINNET_URL ||
-        `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://arbitrum-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       sepolia:
         process.env.ARBITRUM_SEPOLIA_URL ||
-        `https://arbitrum-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://arbitrum-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     base: {
       mainnet:
-        process.env.BASE_MAINNET_URL ||
-        `https://base-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.BASE_MAINNET_URL || `https://base-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       sepolia:
-        process.env.BASE_SEPOLIA_URL ||
-        `https://base-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.BASE_SEPOLIA_URL || `https://base-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     optimism: {
       mainnet:
         process.env.OPTIMISM_MAINNET_URL ||
-        `https://optimism-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://optimism-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       sepolia:
         process.env.OPTIMISM_SEPOLIA_URL ||
-        `https://optimism-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://optimism-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     avalanche: {
       mainnet:
         process.env.AVALANCHE_MAINNET_URL ||
-        `https://avalanche-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://avalanche-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       fuji:
-        process.env.AVALANCHE_FUJI_URL ||
-        `https://avalanche-fuji.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.AVALANCHE_FUJI_URL || `https://avalanche-fuji.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     bsc: {
-      mainnet:
-        process.env.BSC_MAINNET_URL ||
-        `https://bsc-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
-      testnet:
-        process.env.BSC_TESTNET_URL ||
-        `https://bsc-testnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+      mainnet: process.env.BSC_MAINNET_URL || `https://bsc-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
+      testnet: process.env.BSC_TESTNET_URL || `https://bsc-testnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     linea: {
       mainnet:
-        process.env.LINEA_MAINNET_URL ||
-        `https://linea-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.LINEA_MAINNET_URL || `https://linea-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     starknet: {
       mainnet:
         process.env.STARKNET_MAINNET_URL ||
-        `https://starknet-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://starknet-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       sepolia:
         process.env.STARKNET_SEPOLIA_URL ||
-        `https://starknet-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://starknet-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     mantle: {
       mainnet:
-        process.env.MANTLE_MAINNET_URL ||
-        `https://mantle-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.MANTLE_MAINNET_URL || `https://mantle-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       sepolia:
-        process.env.MANTLE_SEPOLIA_URL ||
-        `https://mantle-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.MANTLE_SEPOLIA_URL || `https://mantle-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     opbnb: {
       mainnet:
-        process.env.OPBNB_MAINNET_URL ||
-        `https://opbnb-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.OPBNB_MAINNET_URL || `https://opbnb-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       testnet:
-        process.env.OPBNB_TESTNET_URL ||
-        `https://opbnb-testnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        process.env.OPBNB_TESTNET_URL || `https://opbnb-testnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
     unichain: {
       mainnet:
         process.env.UNICHAIN_MAINNET_URL ||
-        `https://unichain-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://unichain-mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
       sepolia:
         process.env.UNICHAIN_SEPOLIA_URL ||
-        `https://unichain-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || "3d235080f27243d5a8759860b8d178ca"}`,
+        `https://unichain-sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID || ""}`,
     },
   },
 }
