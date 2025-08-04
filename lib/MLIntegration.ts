@@ -2,9 +2,9 @@ export interface MLModel {
   id: string
   name: string
   type: "classification" | "regression" | "clustering" | "nlp" | "computer-vision"
-  status: "training" | "ready" | "error"
+  status: "ready" | "training" | "error"
   accuracy?: number
-  config: Record<string, any>
+  lastTrained?: Date
 }
 
 export interface MLPrediction {
@@ -15,37 +15,51 @@ export interface MLPrediction {
   timestamp: Date
 }
 
-export interface MLTrainingData {
+export interface TrainingData {
   features: any[]
-  labels?: any[]
+  labels: any[]
   validationSplit?: number
 }
 
-export class MLIntegration {
+class MLIntegration {
   private models: Map<string, MLModel> = new Map()
   private predictions: MLPrediction[] = []
 
-  async trainModel(
-    modelId: string,
-    modelConfig: Omit<MLModel, "id" | "status">,
-    trainingData: MLTrainingData,
-  ): Promise<MLModel> {
-    const model: MLModel = {
-      id: modelId,
-      ...modelConfig,
-      status: "training",
-    }
+  constructor() {
+    this.initializeDefaultModels()
+  }
 
-    this.models.set(modelId, model)
+  private initializeDefaultModels(): void {
+    const defaultModels: MLModel[] = [
+      {
+        id: "text-classifier",
+        name: "Text Classification Model",
+        type: "classification",
+        status: "ready",
+        accuracy: 0.85,
+        lastTrained: new Date(),
+      },
+      {
+        id: "sentiment-analyzer",
+        name: "Sentiment Analysis Model",
+        type: "nlp",
+        status: "ready",
+        accuracy: 0.92,
+        lastTrained: new Date(),
+      },
+      {
+        id: "image-classifier",
+        name: "Image Classification Model",
+        type: "computer-vision",
+        status: "ready",
+        accuracy: 0.88,
+        lastTrained: new Date(),
+      },
+    ]
 
-    // Simulate training process
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    // Update model status
-    model.status = "ready"
-    model.accuracy = Math.random() * 0.3 + 0.7 // Random accuracy between 0.7-1.0
-
-    return model
+    defaultModels.forEach((model) => {
+      this.models.set(model.id, model)
+    })
   }
 
   async predict(modelId: string, input: any): Promise<MLPrediction> {
@@ -58,40 +72,28 @@ export class MLIntegration {
       throw new Error(`Model ${modelId} is not ready for prediction`)
     }
 
-    // Simulate prediction based on model type
+    // Simulate ML prediction
+    await new Promise((resolve) => setTimeout(resolve, 100))
+
     let output: any
     let confidence: number
 
     switch (model.type) {
       case "classification":
-        output = ["class_a", "class_b", "class_c"][Math.floor(Math.random() * 3)]
-        confidence = Math.random() * 0.3 + 0.7
-        break
-      case "regression":
-        output = Math.random() * 100
-        confidence = Math.random() * 0.2 + 0.8
+        output = this.simulateClassification(input)
+        confidence = Math.random() * 0.3 + 0.7 // 0.7-1.0
         break
       case "nlp":
-        output = {
-          sentiment: Math.random() > 0.5 ? "positive" : "negative",
-          entities: ["entity1", "entity2"],
-          summary: "Generated summary of the input text",
-        }
-        confidence = Math.random() * 0.25 + 0.75
+        output = this.simulateNLPAnalysis(input)
+        confidence = Math.random() * 0.2 + 0.8 // 0.8-1.0
         break
       case "computer-vision":
-        output = {
-          objects: [
-            { label: "person", confidence: 0.95, bbox: [10, 10, 100, 100] },
-            { label: "car", confidence: 0.87, bbox: [150, 50, 200, 120] },
-          ],
-          classification: "outdoor_scene",
-        }
-        confidence = Math.random() * 0.2 + 0.8
+        output = this.simulateImageAnalysis(input)
+        confidence = Math.random() * 0.4 + 0.6 // 0.6-1.0
         break
       default:
         output = { result: "processed", value: Math.random() }
-        confidence = Math.random() * 0.3 + 0.7
+        confidence = Math.random()
     }
 
     const prediction: MLPrediction = {
@@ -106,27 +108,77 @@ export class MLIntegration {
     return prediction
   }
 
-  async batchPredict(modelId: string, inputs: any[]): Promise<MLPrediction[]> {
-    const predictions: MLPrediction[] = []
-
-    for (const input of inputs) {
-      const prediction = await this.predict(modelId, input)
-      predictions.push(prediction)
+  private simulateClassification(input: any): any {
+    const classes = ["positive", "negative", "neutral"]
+    return {
+      class: classes[Math.floor(Math.random() * classes.length)],
+      probabilities: classes.reduce(
+        (acc, cls) => {
+          acc[cls] = Math.random()
+          return acc
+        },
+        {} as Record<string, number>,
+      ),
     }
-
-    return predictions
   }
 
-  getModel(modelId: string): MLModel | undefined {
-    return this.models.get(modelId)
+  private simulateNLPAnalysis(input: string): any {
+    return {
+      sentiment: Math.random() > 0.5 ? "positive" : "negative",
+      score: Math.random() * 2 - 1, // -1 to 1
+      entities: [{ text: "example", label: "MISC", start: 0, end: 7 }],
+      keywords: ["example", "text", "analysis"],
+    }
+  }
+
+  private simulateImageAnalysis(input: any): any {
+    const objects = ["person", "car", "building", "tree", "animal"]
+    return {
+      objects: objects.slice(0, Math.floor(Math.random() * 3) + 1).map((obj) => ({
+        label: obj,
+        confidence: Math.random() * 0.4 + 0.6,
+        bbox: [Math.random() * 100, Math.random() * 100, Math.random() * 100 + 100, Math.random() * 100 + 100],
+      })),
+    }
+  }
+
+  async trainModel(modelId: string, trainingData: TrainingData): Promise<void> {
+    const model = this.models.get(modelId)
+    if (!model) {
+      throw new Error(`Model ${modelId} not found`)
+    }
+
+    model.status = "training"
+
+    // Simulate training
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    model.status = "ready"
+    model.accuracy = Math.random() * 0.2 + 0.8 // 0.8-1.0
+    model.lastTrained = new Date()
+  }
+
+  createModel(config: Omit<MLModel, "status" | "lastTrained">): string {
+    const model: MLModel = {
+      ...config,
+      status: "ready",
+      lastTrained: new Date(),
+    }
+
+    this.models.set(model.id, model)
+    return model.id
+  }
+
+  getModel(id: string): MLModel | undefined {
+    return this.models.get(id)
   }
 
   getAllModels(): MLModel[] {
     return Array.from(this.models.values())
   }
 
-  deleteModel(modelId: string): boolean {
-    return this.models.delete(modelId)
+  getModelsByType(type: MLModel["type"]): MLModel[] {
+    return Array.from(this.models.values()).filter((model) => model.type === type)
   }
 
   getPredictionHistory(modelId?: string): MLPrediction[] {
@@ -136,80 +188,26 @@ export class MLIntegration {
     return [...this.predictions]
   }
 
-  async evaluateModel(
-    modelId: string,
-    testData: MLTrainingData,
-  ): Promise<{
-    accuracy: number
-    precision: number
-    recall: number
-    f1Score: number
-  }> {
-    const model = this.models.get(modelId)
-    if (!model) {
-      throw new Error(`Model ${modelId} not found`)
-    }
-
-    // Simulate evaluation metrics
-    const accuracy = Math.random() * 0.2 + 0.8
-    const precision = Math.random() * 0.15 + 0.85
-    const recall = Math.random() * 0.15 + 0.85
-    const f1Score = (2 * precision * recall) / (precision + recall)
-
-    return {
-      accuracy,
-      precision,
-      recall,
-      f1Score,
-    }
+  deleteModel(id: string): boolean {
+    return this.models.delete(id)
   }
 
-  async deployModel(
-    modelId: string,
-    endpoint: string,
-  ): Promise<{
-    modelId: string
-    endpoint: string
-    status: "deployed" | "failed"
-    deployedAt: Date
-  }> {
-    const model = this.models.get(modelId)
+  getModelMetrics(id: string): any {
+    const model = this.models.get(id)
     if (!model) {
-      throw new Error(`Model ${modelId} not found`)
+      return null
     }
 
-    // Simulate deployment
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    return {
-      modelId,
-      endpoint,
-      status: "deployed",
-      deployedAt: new Date(),
-    }
-  }
-
-  getModelMetrics(modelId: string): {
-    totalPredictions: number
-    averageConfidence: number
-    lastPrediction?: Date
-  } {
-    const modelPredictions = this.predictions.filter((p) => p.modelId === modelId)
-
-    if (modelPredictions.length === 0) {
-      return {
-        totalPredictions: 0,
-        averageConfidence: 0,
-      }
-    }
-
-    const averageConfidence = modelPredictions.reduce((sum, p) => sum + p.confidence, 0) / modelPredictions.length
-    const lastPrediction = modelPredictions[modelPredictions.length - 1]?.timestamp
+    const modelPredictions = this.predictions.filter((p) => p.modelId === id)
 
     return {
       totalPredictions: modelPredictions.length,
-      averageConfidence,
-      lastPrediction,
+      averageConfidence:
+        modelPredictions.length > 0
+          ? modelPredictions.reduce((sum, p) => sum + p.confidence, 0) / modelPredictions.length
+          : 0,
+      accuracy: model.accuracy,
+      lastUsed: modelPredictions.length > 0 ? modelPredictions[modelPredictions.length - 1].timestamp : null,
     }
   }
 }
