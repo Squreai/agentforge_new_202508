@@ -1,5 +1,7 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
+import type React from "react"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,7 +11,6 @@ import { Zap, Shield, Sparkles, Rocket, X, Code, ExternalLink } from "lucide-rea
 import { Dashboard } from "@/components/dashboard"
 import { ThemeProvider } from "@/components/theme-provider"
 import { useRouter } from "next/navigation"
-import { getLLMService } from "@/services/llmService"
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, Check, Loader2 } from "lucide-react"
 import Link from "next/link"
@@ -189,49 +190,28 @@ interface ApiKeyInputProps {
 }
 
 const ApiKeyInput = ({ onApiKeySet }: ApiKeyInputProps) => {
-  const [apiKey, setApiKey] = useState("AIzaSyBbZ13552fyTJe0qr0OUZ-JUGpfTQe7q_Y")
-  const [isValidating, setIsValidating] = useState(false)
-  const [validationError, setValidationError] = useState<string | null>(null)
+  const [apiKey, setApiKey] = useState("") // 빈 문자열로 변경
   const [isValid, setIsValid] = useState(false)
 
-  const validateApiKey = async () => {
-    if (!apiKey.trim()) {
-      setValidationError("API 키를 입력해주세요.")
-      return
-    }
+  const validateApiKey = (key: string) => {
+    // 기본 Gemini API 키 형식 검증 (AIza로 시작하고 39자리)
+    const geminiKeyPattern = /^AIza[0-9A-Za-z_-]{35}$/
+    return geminiKeyPattern.test(key)
+  }
 
-    setIsValidating(true)
-    setValidationError(null)
-    setIsValid(false)
-
-    try {
-      // 기본값이면 바로 통과
-      if (apiKey === "AIzaSyBbZ13552fyTJe0qr0OUZ-JUGpfTQe7q_Y") {
-        setIsValid(true)
-        setTimeout(() => {
-          onApiKeySet(apiKey)
-        }, 1000)
-        return
-      }
-
-      const llmService = getLLMService(apiKey)
-      const isValid = await llmService.validateApiKey()
-
-      if (isValid) {
-        setIsValid(true)
-        setTimeout(() => {
-          onApiKeySet(apiKey)
-        }, 1500)
-      } else {
-        setValidationError("유효하지 않은 API 키입니다. 다시 확인해주세요.")
-      }
-    } catch (error) {
-      console.error("API 키 검증 오류:", error)
-      setValidationError("API 키 검증 중 오류가 발생했습니다. 다시 시도해주세요.")
-    } finally {
-      setIsValidating(false)
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (validateApiKey(apiKey)) {
+      setIsValid(true)
+      onApiKeySet(apiKey)
+    } else {
+      setIsValid(false)
+      alert("올바른 Gemini API 키 형식이 아닙니다.")
     }
   }
+
+  const [isValidating, setIsValidating] = useState(false)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   return (
     <div className="space-y-4">
@@ -265,7 +245,7 @@ const ApiKeyInput = ({ onApiKeySet }: ApiKeyInputProps) => {
         </Alert>
       )}
 
-      <Button className="w-full h-12 text-base" onClick={validateApiKey} disabled={isValidating || isValid}>
+      <Button className="w-full h-12 text-base" onClick={handleSubmit} disabled={isValidating || isValid}>
         {isValidating ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
