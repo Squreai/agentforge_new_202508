@@ -18,6 +18,82 @@ export interface WorkflowDefinition {
   }>
 }
 
+export interface NodeExecutor {
+  type: string
+  execute: (config: any, input: any) => Promise<any>
+}
+
+export const nodeExecutors: Record<string, NodeExecutor> = {
+  "http-request": {
+    type: "http-request",
+    execute: async (config: any, input: any) => {
+      const { url, method = "GET", headers = {} } = config
+      try {
+        const response = await fetch(url, {
+          method,
+          headers,
+          body: method !== "GET" ? JSON.stringify(input) : undefined,
+        })
+        if (!response.ok) {
+          throw new Error(`HTTP error: ${response.status}`)
+        }
+        return await response.json()
+      } catch (error) {
+        throw new Error(`HTTP request failed: ${error}`)
+      }
+    },
+  },
+  "data-transform": {
+    type: "data-transform",
+    execute: async (config: any, input: any) => {
+      const { transformation } = config
+      if (transformation === "uppercase" && typeof input === "string") {
+        return input.toUpperCase()
+      }
+      if (transformation === "filter" && Array.isArray(input)) {
+        return input.filter((item) => item !== null && item !== undefined)
+      }
+      return input
+    },
+  },
+  condition: {
+    type: "condition",
+    execute: async (config: any, input: any) => {
+      const { condition, trueValue, falseValue } = config
+      let result = false
+      if (condition === "exists") {
+        result = input !== null && input !== undefined
+      } else if (condition === "not_empty") {
+        result = input && (typeof input !== "object" || Object.keys(input).length > 0)
+      }
+      return result ? trueValue : falseValue
+    },
+  },
+  llm: {
+    type: "llm",
+    execute: async (config: any, input: any) => {
+      const { prompt, model = "gpt-3.5-turbo" } = config
+      return {
+        response: `AI response to: ${prompt} with input: ${JSON.stringify(input)}`,
+        model,
+        timestamp: new Date().toISOString(),
+      }
+    },
+  },
+  "code-execution": {
+    type: "code-execution",
+    execute: async (config: any, input: any) => {
+      const { code, language = "javascript" } = config
+      // Simulate code execution
+      return {
+        output: `Executed ${language} code with input: ${JSON.stringify(input)}`,
+        exitCode: 0,
+        executedAt: new Date().toISOString(),
+      }
+    },
+  },
+}
+
 export class WorkflowEngine {
   private workflows: Map<string, WorkflowDefinition> = new Map()
   private executionHistory: Array<{
@@ -61,80 +137,13 @@ export class WorkflowEngine {
   }
 
   private async executeStep(step: WorkflowStep, input: any): Promise<any> {
-    // Simulate step execution based on type
-    switch (step.type) {
-      case "http-request":
-        return this.executeHttpRequest(step.config, input)
-      case "data-transform":
-        return this.executeDataTransform(step.config, input)
-      case "condition":
-        return this.executeCondition(step.config, input)
-      case "llm":
-        return this.executeLLM(step.config, input)
-      default:
-        console.log(`Unknown step type: ${step.type}`)
-        return input
-    }
-  }
-
-  private async executeHttpRequest(config: any, input: any): Promise<any> {
-    const { url, method = "GET", headers = {} } = config
-
-    try {
-      const response = await fetch(url, {
-        method,
-        headers,
-        body: method !== "GET" ? JSON.stringify(input) : undefined,
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`)
-      }
-
-      return await response.json()
-    } catch (error) {
-      throw new Error(`HTTP request failed: ${error}`)
-    }
-  }
-
-  private async executeDataTransform(config: any, input: any): Promise<any> {
-    const { transformation } = config
-
-    // Simple transformation logic
-    if (transformation === "uppercase" && typeof input === "string") {
-      return input.toUpperCase()
+    const executor = nodeExecutors[step.type]
+    if (executor) {
+      return await executor.execute(step.config, input)
     }
 
-    if (transformation === "filter" && Array.isArray(input)) {
-      return input.filter((item) => item !== null && item !== undefined)
-    }
-
+    console.log(`Unknown step type: ${step.type}`)
     return input
-  }
-
-  private async executeCondition(config: any, input: any): Promise<any> {
-    const { condition, trueValue, falseValue } = config
-
-    // Simple condition evaluation
-    let result = false
-    if (condition === "exists") {
-      result = input !== null && input !== undefined
-    } else if (condition === "not_empty") {
-      result = input && (typeof input !== "object" || Object.keys(input).length > 0)
-    }
-
-    return result ? trueValue : falseValue
-  }
-
-  private async executeLLM(config: any, input: any): Promise<any> {
-    const { prompt, model = "gpt-3.5-turbo" } = config
-
-    // Simulate LLM response
-    return {
-      response: `AI response to: ${prompt} with input: ${JSON.stringify(input)}`,
-      model,
-      timestamp: new Date().toISOString(),
-    }
   }
 
   saveWorkflow(workflow: WorkflowDefinition): void {
@@ -192,6 +201,159 @@ export class WorkflowEngine {
       errors,
     }
   }
+}
+
+export async function generateWorkflow(description: string): Promise<WorkflowDefinition> {
+  // Generate a workflow based on description
+  const workflowId = `workflow-${Date.now()}`
+
+  // Simple workflow generation logic
+  const steps: WorkflowStep[] = []
+
+  if (description.toLowerCase().includes("api") || description.toLowerCase().includes("http")) {
+    steps.push({
+      id: "http-step",
+      name: "HTTP Request",
+      type: "http-request",
+      config: {
+        url: "https://api.example.com/data",
+        method: "GET",
+      },
+      position: { x: 100, y: 100 },
+    })
+  }
+
+  if (description.toLowerCase().includes("transform") || description.toLowerCase().includes("process")) {
+    steps.push({
+      id: "transform-step",
+      name: "Data Transform",
+      type: "data-transform",
+      config: {
+        transformation: "filter",
+      },
+      position: { x: 300, y: 100 },
+    })
+  }
+
+  if (description.toLowerCase().includes("ai") || description.toLowerCase().includes("llm")) {
+    steps.push({
+      id: "llm-step",
+      name: "AI Processing",
+      type: "llm",
+      config: {
+        prompt: "Process the following data",
+        model: "gpt-3.5-turbo",
+      },
+      position: { x: 500, y: 100 },
+    })
+  }
+
+  // If no specific steps identified, add a default step
+  if (steps.length === 0) {
+    steps.push({
+      id: "default-step",
+      name: "Default Processing",
+      type: "data-transform",
+      config: {
+        transformation: "identity",
+      },
+      position: { x: 100, y: 100 },
+    })
+  }
+
+  // Generate connections between steps
+  const connections = []
+  for (let i = 0; i < steps.length - 1; i++) {
+    connections.push({
+      from: steps[i].id,
+      to: steps[i + 1].id,
+    })
+  }
+
+  return {
+    id: workflowId,
+    name: `Generated Workflow`,
+    description,
+    steps,
+    connections,
+  }
+}
+
+export async function generateCode(workflow: WorkflowDefinition, language = "javascript"): Promise<string> {
+  let code = ""
+
+  switch (language.toLowerCase()) {
+    case "javascript":
+    case "js":
+      code = `// Generated workflow: ${workflow.name}
+async function executeWorkflow(input) {
+  let result = input;
+  
+${workflow.steps
+  .map(
+    (step) => `  // Step: ${step.name}
+  result = await executeStep_${step.id}(result);`,
+  )
+  .join("\n")}
+  
+  return result;
+}
+
+${workflow.steps
+  .map(
+    (step) => `
+async function executeStep_${step.id}(input) {
+  // ${step.type} step implementation
+  console.log('Executing ${step.name}');
+  return input; // Placeholder implementation
+}`,
+  )
+  .join("\n")}
+
+module.exports = { executeWorkflow };`
+      break
+
+    case "python":
+    case "py":
+      code = `# Generated workflow: ${workflow.name}
+import asyncio
+import json
+
+async def execute_workflow(input_data):
+    result = input_data
+    
+${workflow.steps
+  .map(
+    (step) => `    # Step: ${step.name}
+    result = await execute_step_${step.id}(result)`,
+  )
+  .join("\n")}
+    
+    return result
+
+${workflow.steps
+  .map(
+    (step) => `
+async def execute_step_${step.id}(input_data):
+    # ${step.type} step implementation
+    print(f'Executing ${step.name}')
+    return input_data  # Placeholder implementation`,
+  )
+  .join("\n")}
+
+if __name__ == "__main__":
+    # Example usage
+    result = asyncio.run(execute_workflow({"test": "data"}))
+    print(json.dumps(result, indent=2))`
+      break
+
+    default:
+      code = `// Unsupported language: ${language}
+// Workflow: ${workflow.name}
+// Steps: ${workflow.steps.map((s) => s.name).join(", ")}`
+  }
+
+  return code
 }
 
 // Singleton instance
